@@ -218,6 +218,27 @@ void DetermineBackgroundLevels::CalculateMeanandStdRegress(std::string eName, in
 	}
 }
 
+void DetermineBackgroundLevels::ReadFromFile(std::string eName, std::string backfile, BG_signals& bglevelsloc){
+	std::ifstream in;
+	in.open(backfile.c_str(), std::fstream::in);
+	std::string line1, c1, c2, c3, c4, c5, c6, c7;
+	
+	expName= eName; //set experiment name
+	
+	getline(in, line1);
+		
+		
+		while (getline(in, line1)){
+			std::stringstream line(line1);
+			line>>c1>>c2>>c3>>c4>>c5>>c6>>c7;
+			bglevelsloc.smoothed.emplace(std::stoi(c1), std::stof(c6));
+			bglevelsloc.mean.emplace(std::stoi(c1), std::stof(c3));
+			bglevelsloc.stdev.emplace(std::stoi(c1), std::stof(c4));
+			bglevelsloc.smoothed_stdev.emplace(std::stoi(c1), std::stof(c7)); 
+			
+		}
+}
+
 void DetermineBackgroundLevels::PrintBackgroundFrequency(int bSize, int bSizePP, PrDes::RENFileInfo& reInfo){
 	
 	std::string FileNamePE, FileNamePP;

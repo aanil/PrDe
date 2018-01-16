@@ -62,6 +62,8 @@ int HiCapTools::ProxDetectMain(std::string whichchr, std::string statsOption, st
 		std::string filepath;
 		std::string name;
 		std::string designname;
+		std::string backgroundfilePD;
+		std::string backgroundfilePP;
 	};
 	int NOFEXPERIMENTS; // Number of Experiments
 	int padding = 500; //For Sequence Capture Probes
@@ -73,6 +75,7 @@ int HiCapTools::ProxDetectMain(std::string whichchr, std::string statsOption, st
 	std::string NegCtrlProbeFileName;
 	std::string ExpFileName;
 	std::string BaseFileName;
+	std::string usePriorBackground;
     std::vector <Experiment> Experiments; 
 	Experiment Exptemp;
 	std::map <std::string, std::string> probeType;
@@ -388,6 +391,9 @@ int HiCapTools::ProxDetectMain(std::string whichchr, std::string statsOption, st
 				if(line.substr(0, line.find('=')).find("Number of Experiments")!=std::string::npos){
 					NOFEXPERIMENTS=std::stoi(line.substr(line.find('=')+1));
 				}
+				if(line.substr(0, line.find('=')).find("Use Prior Background")!=std::string::npos){
+					usePriorBackground=line.substr(line.find('=')+1);
+				}
 				if(line.substr(0, line.find('=')).find("Experiment BAM File Name Path")!=std::string::npos){
 					
 					std::string s;
@@ -399,6 +405,11 @@ int HiCapTools::ProxDetectMain(std::string whichchr, std::string statsOption, st
 					Exptemp.name=line.substr(line.find('=')+1);
 					getline(ExpFile, line);
 					Exptemp.designname=line.substr(line.find('=')+1);
+					getline(ExpFile, line);
+					Exptemp.backgroundfilePD=line.substr(line.find('=')+1);
+					getline(ExpFile, line);
+					Exptemp.backgroundfilePP=line.substr(line.find('=')+1);
+					
 					Experiments.push_back(Exptemp);
 				}
 			}
@@ -572,20 +583,28 @@ int HiCapTools::ProxDetectMain(std::string whichchr, std::string statsOption, st
 		
 		
 		if(CALCULATE_P_VALUES){ //Fill NegCtrl proximities to calculate background interaction frequencies
-			bamfile.ProcessSortedBamFile_NegCtrls(ProbeClass, dpnII, proximities, Exptemp.filepath, ExperimentNo, Exptemp.designname, statsOption, proms);
+			//bamfile.ProcessSortedBamFile_NegCtrls(ProbeClass, dpnII, proximities, Exptemp.filepath, ExperimentNo, Exptemp.designname, statsOption, proms);
 		
 			background.push_back(DetermineBackgroundLevels());
-		
-			background.back().CalculateMeanandStdRegress(Exptemp.name, ExperimentNo, Exptemp.designname, background.back().bglevels, BinSize, "ProbeDistal", MinimumJunctionDistance, log, WindowSize);
-			background.back().CalculateMeanandStdRegress(Exptemp.name, ExperimentNo, Exptemp.designname, background.back().bglevelsProbeProbe, BinSizeProbeProbe, "ProbeProbe", MinimumJunctionDistance, log, WindowSizeProbeProbe);
 			
-			log << "Total_Number_of_Pairs" << '\t' << totalNumberofPairs/2 << std::endl;
-			log << "Total_Number_of_Pairs on Probes" << '\t' << NumberofPairs << std::endl;
-			log << "Number_of_Pairs_Both_Reads_on_Probe" << '\t' << NofPairs_Both_on_Probe << std::endl;
-			log << "Number_of_Pairs_One_Read_on_Probe" << '\t' << NofPairs_One_on_Probe << std::endl;
-			log << "Number_of_Pairs_None_on_Probe" << '\t' << NofPairsNoAnn << std::endl;
-			log << "FractionofPairsOnProbe" << '\t' << (NumberofPairs)/double(totalNumberofPairs/2) << std::endl; 	    
-			totalNumberofPairs = 0; NumberofPairs = 0; NofPairs_Both_on_Probe = 0; NofPairs_One_on_Probe = 0; NofPairsNoAnn = 0;
+			
+			if(usePriorBackground=="Yes" || usePriorBackground=="yes"|| usePriorBackground=="Y" || usePriorBackground== "y"){
+				background.back().ReadFromFile(Exptemp.name, Exptemp.backgroundfilePD, background.back().bglevels);
+				background.back().ReadFromFile(Exptemp.name, Exptemp.backgroundfilePP, background.back().bglevelsProbeProbe);
+			}
+			else{
+				
+				background.back().CalculateMeanandStdRegress(Exptemp.name, ExperimentNo, Exptemp.designname, background.back().bglevels, BinSize, "ProbeDistal", MinimumJunctionDistance, log, WindowSize);
+				background.back().CalculateMeanandStdRegress(Exptemp.name, ExperimentNo, Exptemp.designname, background.back().bglevelsProbeProbe, BinSizeProbeProbe, "ProbeProbe", MinimumJunctionDistance, log, WindowSizeProbeProbe);
+			
+				log << "Total_Number_of_Pairs" << '\t' << totalNumberofPairs/2 << std::endl;
+				log << "Total_Number_of_Pairs on Probes" << '\t' << NumberofPairs << std::endl;
+				log << "Number_of_Pairs_Both_Reads_on_Probe" << '\t' << NofPairs_Both_on_Probe << std::endl;
+				log << "Number_of_Pairs_One_Read_on_Probe" << '\t' << NofPairs_One_on_Probe << std::endl;
+				log << "Number_of_Pairs_None_on_Probe" << '\t' << NofPairsNoAnn << std::endl;
+				log << "FractionofPairsOnProbe" << '\t' << (NumberofPairs)/double(totalNumberofPairs/2) << std::endl; 	    
+				totalNumberofPairs = 0; NumberofPairs = 0; NofPairs_Both_on_Probe = 0; NofPairs_One_on_Probe = 0; NofPairsNoAnn = 0;
+			}
 		}
 		if(interactiontype!="Neg"){
 			bamfile.ProcessSortedBAMFile(ProbeClass, dpnII, proximities, Exptemp.filepath, ExperimentNo, whichchr, Exptemp.designname, statsOption, proms);
@@ -611,7 +630,6 @@ int HiCapTools::ProxDetectMain(std::string whichchr, std::string statsOption, st
 
 		log << Exptemp.filepath << "     finished" << std::endl;
 	}
-    
     if(statsOption!="ComputeStatsOnly"){
 		if(interactiontype=="Neg"){
 			

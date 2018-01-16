@@ -41,21 +41,19 @@ Other=other
 /--The experiment details. Enter the experiment details below. Enter integer for number of experiments--/
 Number of Experiments=4
 
+/--Option to use background files from another HiCapTools run. The field Background file in Experiment details is mandatory if this option is set to Yes--/
+Use Prior Background=Yes
+
 /--Experiment Detail fields. --/
-/--Copy, Paste and fill the below 3 fields as many times as there are number of experiments. --/
+/--Copy, Paste and fill the below 4 fields as many times as there are number of experiments. --/
+/--Background File is mandatory if Use Prior Background is set to Yes. Leave blank otherwise --/
 
 Experiment BAM File Name Path=/pica/v16/b2015060_nobackup/ANALYSIS/THP1_merged/THP1.nLPS.rep1/THP1.nLPS.rep1.trunc.dedup.sortedbycoord.bam
 Experiment Name=THP1.nLPS.rep1
 Probe Design Name=merged
+Background File=
 
 Experiment BAM File Name Path=/pica/v16/b2015060_nobackup/ANALYSIS/THP1_merged/THP1.wLPS.rep1/THP1.wLPS.rep1.trunc.dedup.sortedbycoord.bam
 Experiment Name=THP1.wLPS.rep1
 Probe Design Name=merged
-
-Experiment BAM File Name Path=/pica/v16/b2015060_nobackup/ANALYSIS/THP1_merged/THP1.nLPS.rep3/THP1.nLPS.rep3.trunc.dedup.sortedbycoord.bam
-Experiment Name=THP1.nLPS.rep3
-Probe Design Name=merged
-
-Experiment BAM File Name Path=/pica/v16/b2015060_nobackup/ANALYSIS/THP1_merged/THP1.wLPS.rep3/THP1.wLPS.rep3.trunc.dedup.sortedbycoord.bam
-Experiment Name=THP1.wLPS.rep3
-Probe Design Name=merged
+Background File=

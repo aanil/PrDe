@@ -45,6 +45,7 @@ public:
 	
 	void CalculateMeanandStdRegress(std::string, int, std::string, BG_signals&, int, std::string, int, OutStream&, int);
 	void PrintBackgroundFrequency(int, int, PrDes::RENFileInfo&);
+	void ReadFromFile(std::string, std::string, BG_signals&);
 	
 private:
 	std::string expName;
